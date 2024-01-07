@@ -1,0 +1,53 @@
+{% extends 'books/layout.html' %}
+
+{% block title %}Chat{% endblock %}
+
+{% block header %}
+<h1 class="display-4 text-primary">Chat</h1>
+<p class="caption">※ハイライトを選択し、トークルームを表示できるようにしたいなあ。</p>
+{% if messages %}
+<ul class="messages">
+    {% for message in messages %}
+    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{message}}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<table class="table mt-3">
+    <tr><th>BookRecored</th></tr>
+    <tr><td>
+    <p class="my-0">
+        {% if brcd_contents.group.title == 'public' %}
+        <span class="bg-info text-light px-1">Public</span>
+        {% endif %}
+        『{{brcd_contents.title}}』 ({{brcd_contents.first_author}}, {{brcd_contents.pub_year}})
+    </p>
+    <p class="my-0">Score: {{brcd_contents.score}}/10</p>
+    <p class="my-0">Genre: {{brcd_contents.genre}}</p>
+    <p class="my-0">Summary:</p>
+    <p class="my-0">{{brcd_contents.summary|linebreaksbr}}</p>
+    <p class="my-0">Report:</p>
+    <p class="my-0">{{brcd_contents.report|linebreaksbr}}</p>
+    <p class="">({{brcd_contents.pub_date}})</p>
+    </td></tr>
+</table>
+
+<form action="{% url 'chat' id %}" method="post">
+    {% csrf_token%}
+    {{form.as_p}}
+    <button class="btn btn-primary">Go!</button>
+    </form>
+
+<table class="table mt-3">
+    <tr><th>Chat History</th></tr>
+{% for item in chat_contents %}
+    <tr><td>
+    <p class="my-0">{{item.owner}}: {{item.comment}}</p>
+    <p class="">({{item.pub_date}})</p>
+    </td></tr>
+{% endfor %}
+</table>
+
+{% endblock %}

@@ -1,5 +1,5 @@
 from django import forms
-from.models import BookRecord, Group, Friend, Good
+from.models import BookRecord, Group, Friend, Good, Chat
 from django.contrib.auth.models import User
 
 class BookRecordForm(forms.ModelForm):
@@ -21,6 +21,7 @@ class GoodForm(forms.ModelForm):
     class Meta:
         model = Good
         fields = ['owner', 'bookrecord']
+
         
 class GroupCheckForm(forms.Form):
     def __init__(self, user, *args, **kwargs):
@@ -95,3 +96,8 @@ class PostForm(forms.Form):
         )
         
         
+class ChatForm(forms.Form):
+    comment = forms.CharField(max_length=140, min_length=0,
+                               widget=forms.Textarea(attrs={'class':'form-control',
+                                                            'row':2,
+                                                            'placeholder': '140字以内で入力してください。'}))

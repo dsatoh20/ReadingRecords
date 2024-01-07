@@ -53,6 +53,9 @@
     </span>
     <span class="float-right">
         "{{item.owner}}"(<a href="{% url 'add' %}?name={{item.owner}}">add friend</a>)
+        <a href="{% url 'chat' item.id %}">
+            <button class="py-0">chat</button>
+        </a>
         <a href="{% url 'good' item.id %}">
             <button class="py-0">good!</button>
         </a>

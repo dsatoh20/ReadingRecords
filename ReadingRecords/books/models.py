@@ -30,7 +30,7 @@ class BookRecord(models.Model):
     pub_date = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
-        return str(self.title) + '/' + str(self.first_author) + ' 著'
+        return str(self.title) + '/' + str(self.first_author)
     class Meta:
         ordering = ('-pub_date',)
         
@@ -59,6 +59,16 @@ class Good(models.Model):
     def __str__(self):
         return 'good for "' + str(self.bookrecord) + '" (by ' + \
             str(self.owner) + ')'
+
+class Chat(models.Model):
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='chat_owner')
+    bookrecord = models.ForeignKey(BookRecord, on_delete=models.CASCADE)
+    comment = models.TextField(max_length=140)
+    pub_date = models.DateTimeField(auto_now_add=True)
+    def __str__(self):
+        return "chat about " + str(self.bookrecord) 
+    class Meta:
+        ordering = ('pub_date',)
 
 # class NewsRecord(models.Model):
 # class CinemaRecord(models.Model):
