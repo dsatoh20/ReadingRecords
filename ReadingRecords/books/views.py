@@ -6,8 +6,8 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 
-from .models import BookRecord, Friend, Group, Good
-from .forms import GroupCheckForm, GroupSelectForm, FriendsForm, CreateGroupForm, PostForm
+from .models import BookRecord, Friend, Group, Good, Chat
+from .forms import GroupCheckForm, GroupSelectForm, FriendsForm, CreateGroupForm, PostForm, ChatForm
 
 # indexのビュー関数
 @login_required(login_url='/admin/login/')
@@ -75,26 +75,31 @@ def groups(request):
         # Friendsのチェック更新時の処理
         if request.POST['mode'] == '__friends_form__':
             # 選択したGroupを取得
-            sel_group = request.POST['group']
-            group_obj = Group.objects.filter(title=sel_group).first()
-            print(group_obj)
-            # チェックしたFriendsを取得
-            sel_fds = request.POST.getlist('friends')
-            # FriendsのUserを取得
-            sel_users = User.objects.filter(username__in=sel_fds)
-            # Userのリストに含まれるユーザーが登録したFriendを取得
-            fds = Friend.objects.filter(owner=request.user).filter(user__in=sel_users)
-            # すべてのFriendにGroupを設定し保存
-            vlist = []
-            for item in fds:
-                item.group = group_obj
-                item.save()
-                vlist.append(item.user.username)
-            # メッセージを設定
-            messages.success(request, 'チェックされたFriendを' + sel_group + 'に登録しました。')
-            # フォームの用意
-            groupsform = GroupSelectForm(request.user, {'groups': sel_group})
-            friendsform = FriendsForm(request.user, friends=friends, vals=vlist)
+            try:
+                sel_group = request.POST['group']
+                group_obj = Group.objects.filter(title=sel_group).first()
+                print(group_obj)
+                # チェックしたFriendsを取得
+                sel_fds = request.POST.getlist('friends')
+                # FriendsのUserを取得
+                sel_users = User.objects.filter(username__in=sel_fds)
+                # Userのリストに含まれるユーザーが登録したFriendを取得
+                fds = Friend.objects.filter(owner=request.user).filter(user__in=sel_users)
+                # すべてのFriendにGroupを設定し保存
+                vlist = []
+                for item in fds:
+                    item.group = group_obj
+                    item.save()
+                    vlist.append(item.user.username)
+                # メッセージを設定
+                messages.success(request, 'チェックされたFriendを' + sel_group + 'に登録しました。')
+                # フォームの用意
+                groupsform = GroupSelectForm(request.user, {'groups': sel_group})
+                friendsform = FriendsForm(request.user, friends=friends, vals=vlist)
+            except:
+                messages.success(request, "グループを選択してください。")
+                groupsform = GroupSelectForm(request.user)
+                friendsform = FriendsForm(request.user, friends=friends, vals=[])
             
     # GETアクセス時の処理
     else:
@@ -223,6 +228,58 @@ def good(request, good_id):
     # メッセージを設定
     messages.success(request, 'RecordにGoodしました！')
     return redirect(to='/books')
+
+# chatボタンの処理
+@login_required(login_url='/admin/login/')
+def chat_button(request, chat_id):
+    # chatするBookRecordを取得
+    chat_brcd = BookRecord.objects.get(id=chat_id)
+    print(chat_brcd, "ボタン")
+    messages.success(request, 'Chatページに移行します！')
+    return redirect(to="/books/chat.html")
+
+# chatのビュー関数
+@login_required(login_url='/admin/login/')
+def chat(request, chat_id):
+    chat_theme = BookRecord.objects.get(id=chat_id)
+    print(chat_theme, "ビュー")
+    # POST送信時の処理
+    if request.method == 'POST':
+        # 送信内容の処理
+        comment = request.POST['comment']
+        # Chatを作成して保存
+        chat = Chat()
+        chat.owner = request.user
+        chat.bookrecord = chat_theme
+        chat.comment = comment
+        form = ChatForm()
+        chat.save()
+        print("POST OK")
+        chat = Chat.objects.filter(bookrecord=chat_theme)
+    # GETアクセス時の処理
+    else:
+        form = ChatForm()
+        print("GETのフォーム OK")
+        chat = Chat.objects.filter(bookrecord=chat_theme)
+        print(chat, "GETのchat OK")
+    # 共通処理
+    params = {
+        'login_user': request.user,
+        'brcd_contents': chat_theme,
+        'chat_contents': chat,
+        'form': form,
+        'id': chat_id,
+    }
+    print("login_user: ", request.user,
+          "\nbrcd_contents: ", chat_theme,
+          "\nchat_contents: ", chat,
+          "\nform: ", form,
+          "\nid: ", chat_id
+          )
+    return render(request, 'books/chat.html', params)
+    
+
+
     
 # 以降は普通の関数=====================================================================
 
@@ -250,9 +307,15 @@ def get_your_group_bookrecord(owner, glist, page):
     # ページネーションで指定ページを取得
     page_item = Paginator(bookrecords, page_num)
     return page_item.get_page(page)
+
+def get_chat(owner, chat_id):
+    pass
+    
     
 # publicなUserとGroupを取得する
 def get_public():
     public_user = User.objects.filter(username='public').first()
     public_group = Group.objects.filter(owner=public_user).first()
     return (public_user, public_group)
+
+

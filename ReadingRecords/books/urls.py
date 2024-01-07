@@ -9,4 +9,6 @@ urlpatterns = [
     path('creategroup', views.creategroup, name='creategroup'),
     path('post', views.post, name='post'),
     path('good/<int:good_id>', views.good, name='good'),
+    path('chat/<int:chat_id>', views.chat, name='chat'),
+
 ]
