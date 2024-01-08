@@ -40,13 +40,15 @@
         <span class="bg-info text-light px-1">Public</span>
         {% endif %}
         『{{item.title}}』 ({{item.first_author}}, {{item.pub_year}})
+        {% if item.owner == request.user %}
+        <span class="float-right">
+            <a href="{% url 'edit' item.id %}">Edit</a>
+        </span>
+        {% endif %}
     </p>
+    
     <p class="my-0">Score: {{item.score}}/10</p>
     <p class="my-0">Genre: {{item.genre}}</p>
-    <p class="my-0">Summary:</p>
-    <p class="my-0">{{item.summary|linebreaksbr}}</p>
-    <p class="my-0">Report:</p>
-    <p class="my-0">{{item.report|linebreaksbr}}</p>
     <p class="">({{item.pub_date}})</p>
     <span class="float-left text-info">
         good={{item.good_count}}

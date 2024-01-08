@@ -1,0 +1,26 @@
+{% extends 'books/layout.html' %}
+
+{% block title %}Post{% endblock %}
+
+{% block header %}
+<h1 class="display-4 text-primary">BOOKS</h1>
+<p class="caption">※以下の投稿を編集できます。</p>
+{% if messages %}
+<ul class="messages">
+    {% for message in messages %}
+    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{message}}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<form action="{% url 'edit' id %}" method="post">
+{% csrf_token%}
+{{form.as_p}}
+<button class="btn btn-primary">Post!</button>
+<span class="float-right">
+    <a href="{% url 'delete' id %}">Delete</a>
+</span>
+</form>
+{% endblock %}

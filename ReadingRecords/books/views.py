@@ -7,7 +7,7 @@ from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 
 from .models import BookRecord, Friend, Group, Good, Chat
-from .forms import GroupCheckForm, GroupSelectForm, FriendsForm, CreateGroupForm, PostForm, ChatForm
+from .forms import BookRecordForm, GroupCheckForm, GroupSelectForm, FriendsForm, CreateGroupForm, PostForm, ChatForm
 
 # indexのビュー関数
 @login_required(login_url='/admin/login/')
@@ -270,14 +270,45 @@ def chat(request, chat_id):
         'form': form,
         'id': chat_id,
     }
-    print("login_user: ", request.user,
-          "\nbrcd_contents: ", chat_theme,
-          "\nchat_contents: ", chat,
-          "\nform: ", form,
-          "\nid: ", chat_id
-          )
     return render(request, 'books/chat.html', params)
-    
+
+# Editのビュー関数    
+def edit(request, edit_id):
+    brcd = BookRecord.objects.get(id=edit_id)
+    print("BookRecord選択OK")
+    if brcd.owner != request.user:
+        messages.success(request, '自分のでないレコードは編集できません。')
+        return redirect(to='/books')
+    # POST送信時の処理
+    if (request.method == 'POST'):
+        reviced = BookRecordForm(request.POST, instance=brcd)
+        reviced.save()
+        return redirect(to='/books')
+    # GETアクセス時の処理
+    # 共通処理
+    params = {
+        'login_user': request.user,
+        'id': edit_id,
+        'form': BookRecordForm(instance=brcd),
+    }
+    return render(request, 'books/edit.html', params)
+
+# Deleteのビュー関数
+def delete(request, del_id):
+    brcd = BookRecord.objects.get(id=del_id)
+    # POST送信時の処理
+    if (request.method == 'POST'):
+        brcd.delete()
+        messages.success(request, 'レコードを削除しました。')
+        return redirect(to='books')
+    # GETアクセス時の処理
+    # 共通処理
+    params = {
+        'login_user': request.user,
+        'id': del_id,
+        'contents': brcd,
+    }
+    return render(request, 'books/delete.html', params)
 
 
     
@@ -307,10 +338,6 @@ def get_your_group_bookrecord(owner, glist, page):
     # ページネーションで指定ページを取得
     page_item = Paginator(bookrecords, page_num)
     return page_item.get_page(page)
-
-def get_chat(owner, chat_id):
-    pass
-    
     
 # publicなUserとGroupを取得する
 def get_public():

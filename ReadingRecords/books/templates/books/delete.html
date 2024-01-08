@@ -1,0 +1,43 @@
+{% extends 'books/layout.html' %}
+
+{% block title %}Post{% endblock %}
+
+{% block header %}
+<h1 class="display-4 text-primary">BOOKS</h1>
+<p class="caption">※以下の投稿を削除します。</p>
+{% if messages %}
+<ul class="messages">
+    {% for message in messages %}
+    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{message}}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<tr><td>
+    <p class="my-0">
+        『{{contents.title}}』 ({{contents.first_author}}, {{contents.pub_year}})
+        {% if contents.owner == request.user %}
+        <span class="float-right">
+            <a href="{% url 'edit' contents.id %}">Edit</a>
+        </span>
+        {% endif %}
+    </p>
+    <p class="my-0">Score: {{contents.score}}/10</p>
+    <p class="my-0">Genre: {{contents.genre}}</p>
+    <p class="my-0">Summary:</p>
+    <p class="my-0">{{brcd_contents.summary|linebreaksbr}}</p>
+    <p class="my-0">Report:</p>
+    <p class="my-0">{{brcd_contents.report|linebreaksbr}}</p>
+    <p class="">({{brcd_contents.pub_date}})</p>
+    <p class="">({{contents.pub_date}})</p>
+</td></tr>
+<form action="{% url 'delete' id %}" method="post">
+    {% csrf_token%}
+    <tr><th></th><td>
+        <input type="submit" value="click" class="btn-primary">
+    </td></tr>
+
+</form>
+{% endblock %}
