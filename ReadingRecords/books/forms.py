@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 class BookRecordForm(forms.ModelForm):
     class Meta:
         model = BookRecord
-        fields = ['owner', 'group', 'title']
+        fields = ['group', 'title', 'first_author', 'pub_year', 'genre', 'score', 'summary', 'report']
         
 class GroupForm(forms.ModelForm):
     class Meta:
