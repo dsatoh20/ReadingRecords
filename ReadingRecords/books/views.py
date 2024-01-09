@@ -7,7 +7,8 @@ from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 
 from .models import BookRecord, Friend, Group, Good, Chat
-from .forms import BookRecordForm, GroupCheckForm, GroupSelectForm, FriendsForm, CreateGroupForm, PostForm, ChatForm
+from .forms import BookRecordForm, GroupCheckForm, GroupSelectForm, \
+    FriendsForm, CreateGroupForm, PostForm, ChatForm, GenreSelectForm
 
 # indexのビュー関数
 @login_required(login_url='/admin/login/')
@@ -26,7 +27,7 @@ def index(request, page=1):
         for item in request.POST.getlist('groups'):
             glist.append(item)
         # BookRecordの取得
-        bookrecord = get_your_group_bookrecord(request.user, glist, page)
+        bookrecord = get_your_group_bookrecord_genre(request.user, glist, page)
         
     # GETアクセス時の処理
     else:
@@ -254,8 +255,14 @@ def chat(request, chat_id):
         chat.comment = comment
         form = ChatForm()
         chat.save()
+        # BookRecordのchat_countを1増やす
+        # num = Chat.objects.filter(bookrecord=chat_theme).count()
+        chat_theme.chat_count += 1
+        # chat_theme.chat_count = num
+        chat_theme.save()
         print("POST OK")
         chat = Chat.objects.filter(bookrecord=chat_theme)
+        
     # GETアクセス時の処理
     else:
         form = ChatForm()
@@ -300,7 +307,7 @@ def delete(request, del_id):
     if (request.method == 'POST'):
         brcd.delete()
         messages.success(request, 'レコードを削除しました。')
-        return redirect(to='books')
+        return redirect(to='/books')
     # GETアクセス時の処理
     # 共通処理
     params = {
@@ -335,6 +342,32 @@ def get_your_group_bookrecord(owner, glist, page):
         me_groups.append(hf.group)
     # Groupがgroupsかme_groupsに含まれるBookRecordの取得
     bookrecords = BookRecord.objects.filter(Q(group__in=groups) | Q(group__in=me_groups))
+    # ページネーションで指定ページを取得
+    page_item = Paginator(bookrecords, page_num)
+    return page_item.get_page(page)
+
+def get_your_group_bookrecord_genre(owner, glist, genlist, page):
+    page_num = 5 # ページ当たりの表示数
+    # publicの取得
+    (public_user, public_group) = get_public()
+    # チェックされたGroupの取得
+    groups = Group.objects.filter(Q(owner=owner) | Q(owner=public_user)).filter(title__in=glist)
+    # Groupに含まれるFriendの取得
+    me_friends = Friend.objects.filter(group__in=groups)
+    # FriendのUserをリストにまとめる
+    me_users = []
+    for f in me_friends:
+        me_users.append(f.user)
+    # UserリストのUserが作ったGroupの取得
+    his_groups = Group.objects.filter(owner__in=me_users)
+    his_friends = Friend.objects.filter(user=owner).filter(group__in=his_groups)
+    me_groups = []
+    for hf in his_friends:
+        me_groups.append(hf.group)
+    # Groupがgroupsかme_groupsに含まれるBookRecordの取得
+    bookrecords = BookRecord.objects.filter(Q(group__in=groups) | Q(group__in=me_groups)).filter(\
+        genre__in=genlist
+    )
     # ページネーションで指定ページを取得
     page_item = Paginator(bookrecords, page_num)
     return page_item.get_page(page)

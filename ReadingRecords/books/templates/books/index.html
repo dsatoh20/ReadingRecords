@@ -53,6 +53,9 @@
     <span class="float-left text-info">
         good={{item.good_count}}
     </span>
+    <span class="float-left text-info">
+        chat={{item.chat_count}}
+    </span>
     <span class="float-right">
         "{{item.owner}}"(<a href="{% url 'add' %}?name={{item.owner}}">add friend</a>)
         <a href="{% url 'chat' item.id %}">
