@@ -2,10 +2,32 @@ from django import forms
 from.models import BookRecord, Group, Friend, Good, Chat
 from django.contrib.auth.models import User
 
+genres = [
+    ('文学・評論', '文学・評論'),
+    ('ノンフィクション', 'ノンフィクション'),
+    ('ビジネス・経済', 'ビジネス・経済'),
+    ('歴史・地理', '歴史・地理'),
+    ('政治・社会', '政治・社会'),
+    ('芸能・エンターテインメント', '芸能・エンターテインメント'),
+    ('アート・建築・デザイン', 'アート・建築・デザイン'),
+    ('人文・思想・宗教', '人文・思想・宗教'),
+    ('暮らし・健康・料理', '暮らし・健康・料理'),
+    ('サイエンス・テクノロジー', 'サイエンス・テクノロジー'),
+    ('趣味・実用', '趣味・実用'),
+    ('教育・自己啓発', '教育・自己啓発'),
+    ('スポーツ・アウトドア', 'スポーツ・アウトドア'),
+    ('事典・年鑑・本・ことば', '事典・年鑑・本・ことば'),
+    ('音楽', '音楽'),
+    ('旅行・紀行', '旅行・紀行'),
+    ('絵本・児童書', '絵本・児童書'),
+    ('コミックス', 'コミックス'),
+    ('--TEST--', '--TEST--'),
+]
+
 class BookRecordForm(forms.ModelForm):
     class Meta:
         model = BookRecord
-        fields = ['group', 'title', 'first_author', 'pub_year', 'genre', 'score', 'summary', 'report']
+        fields = ['group', 'score', 'summary', 'report']
         
 class GroupForm(forms.ModelForm):
     class Meta:
@@ -68,10 +90,7 @@ class PostForm(forms.Form):
         widget=forms.Textarea(attrs={'class': 'form-control',
                                      'rows':1,
                                      'placeholder': "2019"}))
-    genre = forms.CharField(max_length=100, \
-        widget=forms.Textarea(attrs={'class': 'form-control',
-                                     'rows':1,
-                                     'placeholder': '自己啓発'}))
+    genre = forms.ChoiceField(label='Genre', choices=genres)
     score = forms.IntegerField(max_value=10, min_value=1, \
         widget=forms.Textarea(attrs={'class': 'form-control',
                                      'rows':1,
@@ -101,3 +120,11 @@ class ChatForm(forms.Form):
                                widget=forms.Textarea(attrs={'class':'form-control',
                                                             'row':2,
                                                             'placeholder': '140字以内で入力してください。'}))
+
+class GenreSelectForm(forms.Form):
+    def __init__(self, user, *args, **kwargs):
+        super(GenreSelectForm, self).__init__(*args, **kwargs)
+        self.fields['genres'] = forms.ChoiceField(
+            choices=[('-', '-')] + [genre for genre in genres],
+            widget=forms.Select(attrs={'class':'form-control'}),
+        )

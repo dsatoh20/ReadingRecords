@@ -27,10 +27,9 @@
     <p class="my-0">Score: {{contents.score}}/10</p>
     <p class="my-0">Genre: {{contents.genre}}</p>
     <p class="my-0">Summary:</p>
-    <p class="my-0">{{brcd_contents.summary|linebreaksbr}}</p>
+    <p class="my-0">{{contents.summary|linebreaksbr}}</p>
     <p class="my-0">Report:</p>
-    <p class="my-0">{{brcd_contents.report|linebreaksbr}}</p>
-    <p class="">({{brcd_contents.pub_date}})</p>
+    <p class="my-0">{{contents.report|linebreaksbr}}</p>
     <p class="">({{contents.pub_date}})</p>
 </td></tr>
 <form action="{% url 'delete' id %}" method="post">

@@ -27,6 +27,7 @@ class BookRecord(models.Model):
     summary = models.TextField(max_length=500)
     report = models.TextField(max_length=5000)
     good_count = models.IntegerField(default=0)
+    chat_count = models.IntegerField(default=0)
     pub_date = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
